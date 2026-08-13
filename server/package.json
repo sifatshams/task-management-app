@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a task management application using mern",
   "license": "ISC",
-  "author": "sifat bin anwar",
+  "author": "Sifat Bin Anwar",
   "type": "module",
   "main": "server.js",
   "scripts": {
