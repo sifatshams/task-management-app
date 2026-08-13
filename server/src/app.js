@@ -15,6 +15,6 @@ app.use(
 );
 app.use(urlencoded({ extended: true }));
 
-// api endpoints
+// api endpoint's
 
 export default app;
