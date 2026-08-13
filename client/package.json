@@ -1,6 +1,8 @@
 {
   "name": "client",
   "private": true,
+  "description": "This is a full stack task management app using mern",
+  "author": "Sifat Bin Anwar",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
