@@ -12,7 +12,7 @@ const { default: connectDB } = await import('./src/config/db.js');
 
 const port = process.env.PORT || 3000;
 
-// if database connection is successful, start the server
+// if database connection is successful then start the server
 connectDB().then(() => {
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
