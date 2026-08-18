@@ -1,5 +1,5 @@
 // register user
-export const regiterUser = async (req, res) => {};
+export const registerUser = async (req, res) => {};
 
 // login user
 export const loginUser = async (req, res) => {};
