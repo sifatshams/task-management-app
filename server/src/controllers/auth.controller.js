@@ -4,8 +4,7 @@ import User from '../models/user.model.js';
 export const registerUser = async (req, res) => {
   try {
     // destructure data from req body
-    const { name, email, password, profileImageUrl, adminInviteToken } =
-      req.body;
+    const { name, email, password, profileImage, adminInviteToken } = req.body;
 
     // check user already exists
     const existingUser = await User.findOne({ email });
