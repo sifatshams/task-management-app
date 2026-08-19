@@ -59,7 +59,49 @@ export const registerUser = async (req, res) => {
 };
 
 // login user
-export const loginUser = async (req, res) => {};
+export const loginUser = async (req, res) => {
+  try {
+    // get email and password from request body
+    const { email, password } = req.body;
+
+    // find user by email
+    const user = await User.findOne({ email });
+
+    // check user exists and password is correct
+    if (!user || !(await user.matchPassword(password))) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials!',
+      });
+    }
+
+    // generate jwt token
+    const token = generateToken({
+      id: user._id,
+      role: user.role,
+    });
+
+    // success response
+    res.status(200).json({
+      success: true,
+      message: 'User logged in successfully!',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage,
+        token,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error!',
+      error: error.message,
+    });
+  }
+};
 
 // * private
 // get user profile
