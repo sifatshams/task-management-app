@@ -78,7 +78,6 @@ export const loginUser = async (req, res) => {
     // generate jwt token
     const token = generateToken({
       id: user._id,
-      role: user.role,
     });
 
     // success response
