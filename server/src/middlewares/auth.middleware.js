@@ -36,3 +36,25 @@ export const protect = async (req, res, next) => {
       .json({ success: false, message: 'Token is invalid or expired!' });
   }
 };
+
+// only access admin
+export const adminOnly = async (req, res, next) => {
+  try {
+    // checking if the user exists
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Not authorized!' });
+    }
+
+    // admin validatin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied: Admin only!' });
+    }
+
+    next();
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
