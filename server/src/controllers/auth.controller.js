@@ -76,9 +76,7 @@ export const loginUser = async (req, res) => {
     }
 
     // generate jwt token
-    const token = generateToken({
-      id: user._id,
-    });
+    const token = generateToken(user._id);
 
     // success response
     res.status(200).json({
