@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { urlencoded } from 'express';
+import authRoute from './routes/auth.route.js';
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.use(
 app.use(urlencoded({ extended: true }));
 
 // api endpoint's
+app.use('/api/auth', authRoute);
 
 export default app;
