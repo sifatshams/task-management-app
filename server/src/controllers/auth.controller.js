@@ -105,7 +105,26 @@ export const loginUser = async (req, res) => {
 
 // * private
 // get user profile
-export const getUserProfile = async (req, res) => {};
+export const getUserProfile = async (req, res) => {
+  try {
+    // find user
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'User not found!' });
+    }
+
+    // success response
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error!',
+      error: error.message,
+    });
+  }
+};
 
 // update user profile
 export const updateUserProfile = async (req, res) => {};
