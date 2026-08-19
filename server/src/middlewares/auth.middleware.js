@@ -5,38 +5,48 @@ import User from '../models/user.model.js';
 export const protect = async (req, res, next) => {
   let token;
 
+  // get token from cookie or Authorization header
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
   } else if (
     req.headers.authorization &&
-    req.headers.authorization.statsWith('Bearer')
+    req.headers.authorization.startsWith('Bearer')
   ) {
-    token = req.headers.authorization.split(' ')[1]; // extract token
+    token = req.headers.authorization.split(' ')[1];
   }
 
-  // if token not found
+  // no token found
   if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: 'Not authorized, user not found!' });
+    return res.status(401).json({
+      success: false,
+      message: 'Not authorized, no token!',
+    });
   }
+
   try {
+    // verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // find user from database
     req.user = await User.findById(decoded.id).select('-password');
 
-    // if the token is correct but that user is deleted from database
+    // token is valid but user no longer exists
     if (!req.user) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'User no longer exists!' });
+      return res.status(401).json({
+        success: false,
+        message: 'User no longer exists!',
+      });
     }
+
+    // go to next middleware/controller
+    next();
   } catch (error) {
-    return res
-      .status(401)
-      .json({ success: false, message: 'Token is invalid or expired!' });
+    return res.status(401).json({
+      success: false,
+      message: 'Token is invalid or expired!',
+    });
   }
 };
-
 // only access admin
 export const adminOnly = async (req, res, next) => {
   try {
