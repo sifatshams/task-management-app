@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import { generateToken } from '../utils/jwt.util.js';
 
 // register user
 export const registerUser = async (req, res) => {
@@ -32,6 +33,9 @@ export const registerUser = async (req, res) => {
       role,
     });
 
+    // generate jwt token
+    const token = generateToken(user._id);
+
     // success response
     res.status(201).json({
       success: true,
@@ -41,6 +45,8 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        profileImage: user.profileImage,
+        token,
       },
     });
   } catch (error) {
