@@ -19,6 +19,6 @@ app.use(urlencoded({ extended: true }));
 
 // api endpoint's
 app.use('/api/auth', authRoute);
-app.use('/api/user', userRoute);
+app.use('/api/users', userRoute);
 
 export default app;
