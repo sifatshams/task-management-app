@@ -2,8 +2,10 @@ import express from 'express';
 import {
   createTask,
   deleteTask,
+  getDashboardData,
   getTaskById,
   getTasks,
+  getUserDashboardData,
   updateTask,
   updateTaskChecklist,
   updateTaskStatus,
@@ -13,7 +15,7 @@ import { adminOnly, protect } from '../middlewares/auth.middleware.js';
 const taskRoute = express.Router();
 
 // task management routes
-taskRoute.get('/dashboard-data', protect, detDashboardData);
+taskRoute.get('/dashboard-data', protect, getDashboardData);
 taskRoute.gett('/user-dashboard-data', protect, getUserDashboardData);
 taskRoute.get('/', protect, getTasks); // get all users (admin: all, user: assigned)
 taskRoute.get('/:id', protect, getTaskById); // get task by id
