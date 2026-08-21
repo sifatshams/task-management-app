@@ -81,3 +81,27 @@ export const updateTaskChecklist = async (req, res) => {
     });
   }
 };
+
+// Dashboard data (admin only)
+export const getDashboardData = async (req, res) => {
+  try {
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error!',
+      error: error.message,
+    });
+  }
+};
+
+// Dashboard data (user specific)
+export const getUserDashboardData = async (req, res) => {
+  try {
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error!',
+      error: error.message,
+    });
+  }
+};
