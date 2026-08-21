@@ -1,4 +1,13 @@
 import express from 'express';
+import {
+  createTask,
+  deleteTask,
+  getTaskById,
+  getTasks,
+  updateTask,
+  updateTaskChecklist,
+  updateTaskStatus,
+} from '../controllers/task.controller.js';
 import { adminOnly, protect } from '../middlewares/auth.middleware.js';
 
 const taskRoute = express.Router();
