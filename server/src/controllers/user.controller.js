@@ -45,8 +45,17 @@ export const getUsers = async (req, res) => {
   }
 };
 
-export const getUserById = (req, res) => {
+export const getUserById = async (req, res) => {
   try {
+    const user = await User.findById(req.params.id).select('-password');
+    // validation
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found!' });
+
+    // success response
+    res.status(200).json({ success: true, user });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -56,7 +65,7 @@ export const getUserById = (req, res) => {
   }
 };
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
   } catch (error) {
     res.status(500).json({
