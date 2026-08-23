@@ -3,6 +3,70 @@ import Task from '../models/task.model.js';
 // get all tasks (admin: all, user: only assigned tasks)
 export const getTasks = async (req, res) => {
   try {
+    const { status } = req.query;
+    const isAdmin = req.user.role === 'admin';
+
+    // base query setup
+    const filter = {};
+    if (status) filter.status = status;
+    if (!isAdmin) filter.assignedTo = req.user._id;
+
+    // Fetch tasks with lean() for faster execution
+    const rawTasks = await Task.find(filter)
+      .populate('assignedTo', 'name email profileImage')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // map through plain JS objects to compute completed checklist count
+    const tasks = rawTasks.map((task) => {
+      const completedTodoCount = task.todoCheckList
+        ? task.todoCheckList.filter((item) => item.completed).length
+        : 0;
+
+      return {
+        ...task,
+        completedTodoCount,
+      };
+    });
+
+    // summary query base filter
+    const summaryFilter = isAdmin ? {} : { assignedTo: req.user._id };
+
+    // single aggregation query for all status counts
+    const statusCounts = await Task.aggregate([
+      { $match: summaryFilter },
+      {
+        $group: {
+          _id: null,
+          all: { $sum: 1 },
+          pendingTasks: {
+            $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] },
+          },
+          inProgressTasks: {
+            $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] },
+          },
+          completedTasks: {
+            $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    // fallback counts if database is empty
+    const statusSummary = statusCounts[0] || {
+      all: 0,
+      pendingTasks: 0,
+      inProgressTasks: 0,
+      completedTasks: 0,
+    };
+    delete statusSummary._id;
+
+    // success response
+    res.status(200).json({
+      success: true,
+      tasks,
+      statusSummary,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
