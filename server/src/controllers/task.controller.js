@@ -79,6 +79,22 @@ export const getTasks = async (req, res) => {
 // get task by id
 export const getTaskById = async (req, res) => {
   try {
+    // destructure the id
+    const { id } = req.params;
+
+    const task = await Task.findById(id).populate(
+      'assignedTo',
+      'name email profileImage',
+    );
+    // validation
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Task not found!' });
+    }
+
+    // success responsse
+    res.status(200).json({ success: true, task });
   } catch (error) {
     res.status(500).json({
       success: false,
