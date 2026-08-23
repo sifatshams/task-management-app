@@ -217,6 +217,24 @@ export const updateTask = async (req, res) => {
 // delete task
 export const deleteTask = async (req, res) => {
   try {
+    // destructure the id
+    const { id } = req.params;
+
+    const task = await Task.findById(id);
+    // validation
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Task not found!' });
+    }
+
+    // delete task
+    await task.deleteOne();
+
+    // success response
+    res
+      .status(200)
+      .json({ success: false, message: 'Task deleted successfully!' });
   } catch (error) {
     res.status(500).json({
       success: false,
