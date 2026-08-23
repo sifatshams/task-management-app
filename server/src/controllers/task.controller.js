@@ -154,6 +154,57 @@ export const createTask = async (req, res) => {
 // update task details
 export const updateTask = async (req, res) => {
   try {
+    // destructure the id
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      priority,
+      dueDate,
+      todoCheckList,
+      attachments,
+      assignedTo,
+    } = req.body;
+
+    const task = await Task.findById(id).populate(
+      'assignedTo',
+      'name email profileImage',
+    );
+    // validation
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Task not found!' });
+    }
+
+    // update only provided fields
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (priority !== undefined) task.priority = priority;
+    if (dueDate !== undefined) task.dueDate = dueDate;
+    if (todoCheckList !== undefined) task.todoCheckList = todoCheckList;
+    if (attachments !== undefined) task.attachments = attachments;
+
+    // validate assignedTo
+    if (assignedTo !== undefined) {
+      if (!Array.isArray(assignedTo)) {
+        return res.status(400).json({
+          success: false,
+          message: 'assignedTo must be an array of user IDs',
+        });
+      }
+      task.assignedTo = assignedTo;
+    }
+
+    // save update task on db
+    const updatedTask = await task.save();
+
+    // success response
+    res.status(200).json({
+      success: true,
+      message: 'Task updated successfully!',
+      task: updatedTask,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
