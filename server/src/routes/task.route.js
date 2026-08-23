@@ -16,7 +16,7 @@ const taskRoute = express.Router();
 
 // task management routes
 taskRoute.get('/dashboard-data', protect, getDashboardData);
-taskRoute.gett('/user-dashboard-data', protect, getUserDashboardData);
+taskRoute.get('/user-dashboard-data', protect, getUserDashboardData);
 taskRoute.get('/', protect, getTasks); // get all users (admin: all, user: assigned)
 taskRoute.get('/:id', protect, getTaskById); // get task by id
 taskRoute.post('/', protect, adminOnly, createTask); // create a task (admin only)
