@@ -247,6 +247,47 @@ export const deleteTask = async (req, res) => {
 // update task status
 export const updateTaskStatus = async (req, res) => {
   try {
+    // destructure the id
+    const { id } = req.params;
+
+    const task = await Task.findById(id);
+    // validation
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Task not found!' });
+    }
+
+    // check is assigned
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString(),
+    );
+
+    // validation check again
+    if (!isAssigned && req.user.role !== 'admin') {
+      return res
+        .status(403)
+        .json({ success: false, message: 'Not authorized!' });
+    }
+
+    // update task
+    task.status = req.body.status || task.status;
+
+    // is status completed or not
+    if (task.status === 'Completed') {
+      task.todoCheckList.forEach((item) => (item.completed = true));
+      task.progress = 100;
+    } else if (task.status === 'Pending') {
+      task.progress = 0;
+    }
+
+    // save on db
+    await task.save();
+
+    // success response
+    res
+      .status(200)
+      .json({ success: true, message: 'Task status updated!', task });
   } catch (error) {
     res.status(500).json({
       success: false,
