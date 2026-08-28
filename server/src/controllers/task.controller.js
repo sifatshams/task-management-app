@@ -301,7 +301,7 @@ export const updateTaskStatus = async (req, res) => {
 export const updateTaskChecklist = async (req, res) => {
   try {
     // destructure todoChecklist
-    const { todoChecklist } = req.body;
+    const { todoCheckList } = req.body;
     // destructure the id
     const { id } = req.params;
 
@@ -322,14 +322,14 @@ export const updateTaskChecklist = async (req, res) => {
     }
 
     // replace with updated check list
-    task.todoChecklist = todoChecklist || [];
+    task.todoCheckList = todoCheckList || [];
 
     // auto update progress based on checklist completion
-    const completedCount = task.todoChecklist.filter(
+    const completedCount = task.todoCheckList.filter(
       (item) => item.completed === true,
     ).length;
 
-    const totalItems = task.todoChecklist.length;
+    const totalItems = task.todoCheckList.length;
 
     task.progress =
       totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
