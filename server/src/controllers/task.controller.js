@@ -297,11 +297,11 @@ export const updateTaskStatus = async (req, res) => {
   }
 };
 
-// update task cehcklist
+// update task checklist
 export const updateTaskChecklist = async (req, res) => {
   try {
-    // destructure todochecklist
-    const { todoCheckList } = req.body;
+    // destructure todoChecklist
+    const { todoChecklist } = req.body;
     // destructure the id
     const { id } = req.params;
 
@@ -321,13 +321,16 @@ export const updateTaskChecklist = async (req, res) => {
       });
     }
 
-    task.todoCheckList = todoCheckList; // replace with updated check list
+    // replace with updated check list
+    task.todoChecklist = todoChecklist || [];
 
     // auto update progress based on checklist completion
-    const completedCount = task.todoCheckList.filter(
+    const completedCount = task.todoChecklist.filter(
       (item) => item.completed === true,
-    );
-    const totalItems = task.todoCheckList.length;
+    ).length;
+
+    const totalItems = task.todoChecklist.length;
+
     task.progress =
       totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
@@ -349,13 +352,11 @@ export const updateTaskChecklist = async (req, res) => {
     );
 
     // success response
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: 'Task checklist updated!',
-        task: updateTask,
-      });
+    res.status(200).json({
+      success: true,
+      message: 'Task checklist updated!',
+      task: updatedTask,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
