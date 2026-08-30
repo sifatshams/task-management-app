@@ -367,10 +367,74 @@ export const updateTaskChecklist = async (req, res) => {
 };
 
 // Dashboard data (admin only)
-export const getDashboardData = async (req, res) => {
+const getDashboardData = async (req, res) => {
   try {
-    // create a date
+    // create date
     const now = new Date();
+
+    // aggreegate task
+    const [result] = await Task.aggregate([
+      {
+        $facet: {
+          statusCounts: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+          priorityCounts: [
+            { $group: { _id: '$priority', count: { $sum: 1 } } },
+          ],
+          overdueCount: [
+            { $match: { status: { $ne: 'Completed' }, dueDate: { $lt: now } } },
+            { $count: 'count' },
+          ],
+          recentTasks: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            {
+              $project: {
+                title: 1,
+                status: 1,
+                priority: 1,
+                dueDate: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const toMap = (arr, keys) =>
+      keys.reduce((acc, k) => {
+        acc[k.replace(/\s+/g, '')] = arr.find((i) => i._id === k)?.count || 0;
+        return acc;
+      }, {});
+
+    const taskDistribution = toMap(result.statusCounts, [
+      'Pending',
+      'In Progress',
+      'Completed',
+    ]);
+    const totalTasks = Object.values(taskDistribution).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    taskDistribution['All'] = totalTasks;
+
+    const taskPriorityLevels = toMap(result.priorityCounts, [
+      'Low',
+      'Medium',
+      'High',
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statistics: {
+        totalTasks,
+        pendingTasks: taskDistribution.Pending,
+        completedTasks: taskDistribution.Completed,
+        overdueTasks: result.overdueCount[0]?.count || 0,
+      },
+      charts: { taskDistribution, taskPriorityLevels },
+      recentTasks: result.recentTasks,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
