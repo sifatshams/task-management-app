@@ -369,6 +369,8 @@ export const updateTaskChecklist = async (req, res) => {
 // Dashboard data (admin only)
 export const getDashboardData = async (req, res) => {
   try {
+    // create a date
+    const now = new Date();
   } catch (error) {
     res.status(500).json({
       success: false,
