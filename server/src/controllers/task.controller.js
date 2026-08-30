@@ -367,7 +367,7 @@ export const updateTaskChecklist = async (req, res) => {
 };
 
 // Dashboard data (admin only)
-const getDashboardData = async (req, res) => {
+export const getDashboardData = async (req, res) => {
   try {
     // create date
     const now = new Date();
