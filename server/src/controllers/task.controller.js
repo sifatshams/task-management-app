@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Task from '../models/task.model.js';
 
 // get all tasks (admin: all, user: only assigned tasks)
@@ -447,6 +448,74 @@ export const getDashboardData = async (req, res) => {
 // Dashboard data (user specific)
 export const getUserDashboardData = async (req, res) => {
   try {
+    // explicitly cast to ObjectId
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+    const now = new Date();
+
+    const [result] = await Task.aggregate([
+      { $match: { assignedTo: userId } },
+      {
+        $facet: {
+          statusCounts: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+          priorityCounts: [
+            { $group: { _id: '$priority', count: { $sum: 1 } } },
+          ],
+          overdueCount: [
+            { $match: { status: { $ne: 'Completed' }, dueDate: { $lt: now } } },
+            { $count: 'count' },
+          ],
+          recentTasks: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            {
+              $project: {
+                title: 1,
+                status: 1,
+                priority: 1,
+                dueDate: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const toMap = (arr, keys) =>
+      keys.reduce((acc, k) => {
+        acc[k.replace(/\s+/g, '')] = arr.find((i) => i._id === k)?.count || 0;
+        return acc;
+      }, {});
+
+    const taskDistribution = toMap(result.statusCounts, [
+      'Pending',
+      'In Progress',
+      'Completed',
+    ]);
+    const totalTasks = Object.values(taskDistribution).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    taskDistribution['All'] = totalTasks;
+
+    const taskPriorityLevels = toMap(result.priorityCounts, [
+      'Low',
+      'Medium',
+      'High',
+    ]);
+
+    // success response
+    res.status(200).json({
+      success: true,
+      statistics: {
+        totalTasks,
+        pendingTasks: taskDistribution.Pending,
+        completedTasks: taskDistribution.Completed,
+        overdueTasks: result.overdueCount[0]?.count || 0,
+      },
+      charts: { taskDistribution, taskPriorityLevels },
+      recentTasks: result.recentTasks,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
