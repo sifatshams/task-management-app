@@ -1,4 +1,8 @@
 import express from 'express';
+import {
+  exportTasksReport,
+  exportUsersReport,
+} from '../controllers/report.controller.js';
 import { adminOnly, protect } from '../middlewares/auth.middleware.js';
 
 const reportRoute = express.Router();
