@@ -17,7 +17,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/signUp" element={<SignUp />} />
+          <Route path="/register" element={<SignUp />} />
 
           {/* Admin Routes */}
           <Route element={<PrivateRoute allowedRoles={['admin']} />}>
