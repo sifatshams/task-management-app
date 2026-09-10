@@ -1,17 +1,56 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Inputs/Input';
 import AuthLayout from '../../components/layouts/AuthLayout';
+import { API_PATHS } from '../../utils/api_path';
+import axiosInstance from '../../utils/axios_instance';
+import { validateEmail } from '../../utils/helper';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // handle login submit
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // validation
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address!');
+      return;
+    }
+
+    if (!password) {
+      setError('Please enter the passcode!');
+      return;
+    }
+
+    setError('');
+
+    // login api call
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+
+      const { token, role } = response.data;
+
+      // redirect based on role
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError('Something went wrong. Please try again!');
+      }
+    }
   };
 
   return (
@@ -42,7 +81,7 @@ const Login = () => {
           />
 
           {/* error msg */}
-          {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
+          {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
 
           <button
             type="submit"
@@ -51,8 +90,11 @@ const Login = () => {
             Login
           </button>
 
-          <p className='text-[13px] text-slate-800 mt-3'>Don't have an account? {" "}
-             <Link className='font-medium text-primary underline' to='/register'>SignUp</Link>
+          <p className="text-[13px] text-slate-800 mt-3">
+            Don't have an account?{' '}
+            <Link className="font-medium text-primary underline" to="/register">
+              SignUp
+            </Link>
           </p>
         </form>
       </div>
