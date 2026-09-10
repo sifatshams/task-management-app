@@ -2,7 +2,7 @@ import axios from 'axios';
 import { BASE_URL } from './api_path';
 
 // create axios instance
-const axios_instance = axios.create({
+const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
@@ -12,7 +12,7 @@ const axios_instance = axios.create({
 });
 
 // request interceptor
-axios_instance.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem('token');
     if (accessToken) {
@@ -24,7 +24,7 @@ axios_instance.interceptors.request.use(
 );
 
 // response interceptor
-axios_instance.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
@@ -54,4 +54,4 @@ axios_instance.interceptors.response.use(
   },
 );
 
-export default axios_instance;
+export default axiosInstance;
