@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Inputs/Input';
 import AuthLayout from '../../components/layouts/AuthLayout';
+import { useUser } from '../../context/userContext';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
 import { validateEmail } from '../../utils/helper';
@@ -11,6 +12,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  // custom hook
+  const { updateUser } = useUser();
 
   // handle login submit
   const handleLogin = async (e) => {
@@ -38,11 +41,15 @@ const Login = () => {
 
       const { token, role } = response.data;
 
-      // redirect based on role
-      if (role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/dashboard');
+      if (token) {
+        updateUser(response.data);
+
+        // redirect based on role
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/user/dashboard');
+        }
       }
     } catch (error) {
       if (error.response && error.response.data.message) {
