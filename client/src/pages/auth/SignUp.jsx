@@ -75,8 +75,8 @@ const SignUp = () => {
             />
 
             <Input
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
+              value={adminInviteToken}
+              onChange={({ target }) => setAdminInviteToken(target.value)}
               label="Admin Invite Token"
               placeholder="6 Digit Code"
               type="text"
@@ -94,7 +94,7 @@ const SignUp = () => {
           </button>
 
           <p className="text-[13px] text-slate-800 mt-3">
-            Don't have an account?{' '}
+            Already an account?{' '}
             <Link className="font-medium text-primary underline" to="/login">
               Login
             </Link>
