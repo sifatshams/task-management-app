@@ -32,6 +32,6 @@ app.use('/api/tasks', taskRoute);
 app.use('/api/reports', reportRoute);
 
 // server uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 export default app;
