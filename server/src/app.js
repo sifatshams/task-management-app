@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { urlencoded } from 'express';
+import path from 'path';
 import authRoute from './routes/auth.route.js';
 import reportRoute from './routes/report.route.js';
 import taskRoute from './routes/task.route.js';
@@ -24,5 +25,8 @@ app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
 app.use('/api/tasks', taskRoute);
 app.use('/api/reports', reportRoute);
+
+// server uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 export default app;
