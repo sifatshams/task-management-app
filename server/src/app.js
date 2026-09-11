@@ -2,12 +2,17 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { urlencoded } from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoute from './routes/auth.route.js';
 import reportRoute from './routes/report.route.js';
 import taskRoute from './routes/task.route.js';
 import userRoute from './routes/user.route.js';
 
 const app = express();
+
+// for Es Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // middleware
 app.use(express.json());
