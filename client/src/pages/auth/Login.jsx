@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
   // custom hook
   const { updateUser } = useUser();
 
@@ -39,24 +40,31 @@ const Login = () => {
         password,
       });
 
-      const { token, role } = response.data;
+      // data from backend res structure
+      const { success, user } = response.data;
 
-      if (token) {
-        updateUser(response.data);
+      if (success && user) {
+        updateUser({
+          ...user,
+          token: user.token || response.data?.token,
+        });
 
-        // redirect based on role
-        if (role === 'admin') {
-          navigate('/admin/dashboard');
+        // role based redirect
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
         } else {
-          navigate('/user/dashboard');
+          navigate('/user/dashboard', { replace: true });
         }
-      }
-    } catch (error) {
-      if (error.response && error.response.data.message) {
-        setError(error.response.data.message);
       } else {
-        setError('Something went wrong. Please try again!');
+        setError('Login failed! Invalid user response.');
       }
+    } catch (err) {
+      // safe error message extraction
+      const errorMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Something went wrong. Please try again!';
+      setError(errorMsg);
     }
   };
 
