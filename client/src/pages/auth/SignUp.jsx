@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Inputs/Input';
 import ProfilePhotoSelector from '../../components/Inputs/ProfilePhotoSelector';
 import AuthLayout from '../../components/layouts/AuthLayout';
+import { useUser } from '../../context/userContext';
+import { API_PATHS } from '../../utils/api_path';
+import axiosInstance from '../../utils/axios_instance';
 import { validateEmail } from '../../utils/helper';
+import uploadImage from '../../utils/upload_image';
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -13,10 +17,16 @@ const SignUp = () => {
   const [adminInviteToken, setAdminInviteToken] = useState('');
 
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  // custom hook
+  const { updateUser } = useUser();
 
   // handle signUp from submit
   const handleSignUp = async (e) => {
     e.preventDefault();
+
+    let profileImageUrl = '';
 
     // validation
     if (!fullName) {
@@ -37,6 +47,47 @@ const SignUp = () => {
     setError('');
 
     // signup api call
+    try {
+      // upload image if present
+      if (profilePic) {
+        const imgUploadRes = await uploadImage(profilePic);
+        profileImageUrl = imgUploadRes.imageUrl || '';
+      }
+
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: fullName,
+        email,
+        password,
+        profileImage: profileImageUrl,
+        adminInviteToken,
+      });
+
+      // data from backend res structure
+      const { success, user } = response.data;
+
+      if (success && user) {
+        updateUser({
+          ...user,
+          token: user.token || response.data?.token,
+        });
+
+        // role based redirect
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate('/user/dashboard', { replace: true });
+        }
+      } else {
+        setError('Registration failed! Invalid response from server.');
+      }
+    } catch (err) {
+      // safe error message extraction
+      const errorMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Something went wrong. Please try again!';
+      setError(errorMsg);
+    }
   };
   return (
     <AuthLayout>
