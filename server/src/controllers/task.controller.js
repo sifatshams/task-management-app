@@ -184,6 +184,7 @@ export const updateTask = async (req, res) => {
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
     if (priority !== undefined) task.priority = priority;
+    if (status !== undefined) task.status = status;
     if (dueDate !== undefined) task.dueDate = dueDate;
     if (todoCheckList !== undefined) task.todoCheckList = todoCheckList;
     if (attachments !== undefined) task.attachments = attachments;
