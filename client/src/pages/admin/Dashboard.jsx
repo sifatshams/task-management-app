@@ -1,8 +1,10 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { LuArrowRight } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import InfoCard from '../../components/Card/InfoCard';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
+import TaskListTable from '../../components/TaskListTable';
 import { useUser } from '../../context/userContext';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import { API_PATHS } from '../../utils/api_path';
@@ -34,6 +36,10 @@ const Dashboard = () => {
     }
   };
 
+  const onSeeMore = () => {
+    navigate('/admin/tasks');
+  };
+
   useEffect(() => {
     getDashboardData();
   }, []);
@@ -52,11 +58,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 
-            - grid-cols-1: একবারে ছোট মোবাইলে ১ টি করে কার্ড দেখাবে।
-            - sm:grid-cols-2: মাঝারি ডিভাইসে (যেমন বড় ফোন/ট্যাব) ২ টি দেখাবে।
-            - lg:grid-cols-4: বড় স্ক্রিনে ৪ টি দেখাবে।
-        */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-6">
           <InfoCard
             label="Total Tasks"
@@ -89,6 +90,22 @@ const Dashboard = () => {
             )}
             color="bg-lime-500"
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 md:my-6">
+        <div className="md:col-span-2">
+          <div className="card">
+            <div className="flex items-center justify-between mb-5">
+              <h5 className="text-lg">Recent Tasks</h5>
+
+              <button className="card-btn" onClick={onSeeMore}>
+                See All <LuArrowRight className="text-base" />
+              </button>
+            </div>
+
+            <TaskListTable tableData={dashboardData?.recentTask || []} />
+          </div>
         </div>
       </div>
     </DashboardLayout>
