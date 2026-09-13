@@ -1,8 +1,9 @@
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LuArrowRight } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import InfoCard from '../../components/Card/InfoCard';
+import CustomPieChart from '../../components/Charts/CustomPieChart';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import TaskListTable from '../../components/TaskListTable';
 import { useUser } from '../../context/userContext';
@@ -10,6 +11,8 @@ import { useUserAuth } from '../../hooks/useUserAuth';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
 import { addThousandsSeparator } from '../../utils/helper';
+
+const COLORS = ['#8D51FF', '#00B8DB', '#7BCE00'];
 
 const Dashboard = () => {
   useUserAuth();
@@ -21,15 +24,38 @@ const Dashboard = () => {
   const [pieChartData, setPieChartData] = useState([]);
   const [barChartData, setBarChartData] = useState([]);
 
+  // prepare chart data
+  const prepareChartData = useCallback((data) => {
+    if (!data?.charts) return;
+
+    const { taskDistribution = {}, taskPriorityLevels = {} } = data.charts;
+
+    const pieData = [
+      { status: 'Pending', count: taskDistribution.Pending || 0 },
+      { status: 'In Progress', count: taskDistribution.InProgress || 0 },
+      { status: 'Completed', count: taskDistribution.Completed || 0 },
+    ];
+
+    const barData = [
+      { priority: 'Low', count: taskPriorityLevels.Low || 0 },
+      { priority: 'Medium', count: taskPriorityLevels.Medium || 0 },
+      { priority: 'High', count: taskPriorityLevels.High || 0 },
+    ];
+
+    setPieChartData(pieData);
+    setBarChartData(barData);
+  }, []);
+
   // get dash data
   const getDashboardData = async () => {
     try {
       const response = await axiosInstance.get(
         API_PATHS.TASKS.GET_DASHBOARD_DATA,
       );
-      // validation
+
       if (response.data) {
         setDashboardData(response.data);
+        prepareChartData(response.data);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -72,15 +98,17 @@ const Dashboard = () => {
             value={addThousandsSeparator(
               dashboardData?.charts?.taskDistribution?.Pending || 0,
             )}
-            color="bg-violet-500"
+            color="bg-amber-500"
           />
 
           <InfoCard
             label="In Progress Tasks"
             value={addThousandsSeparator(
-              dashboardData?.charts?.taskDistribution?.InProgress || 0,
+              dashboardData?.charts?.taskDistribution?.InProgress ||
+                dashboardData?.charts?.taskDistribution?.['In Progress'] ||
+                0,
             )}
-            color="bg-cyan-500"
+            color="bg-blue-500"
           />
 
           <InfoCard
@@ -88,12 +116,22 @@ const Dashboard = () => {
             value={addThousandsSeparator(
               dashboardData?.charts?.taskDistribution?.Completed || 0,
             )}
-            color="bg-lime-500"
+            color="bg-emerald-500"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 md:my-6">
+        <div>
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <h5 className="font-medium">Task Distribution</h5>
+            </div>
+
+            <CustomPieChart data={pieChartData} colors={COLORS} />
+          </div>
+        </div>
+
         <div className="md:col-span-2">
           <div className="card">
             <div className="flex items-center justify-between mb-5">
@@ -104,7 +142,7 @@ const Dashboard = () => {
               </button>
             </div>
 
-            <TaskListTable tableData={dashboardData?.recentTask || []} />
+            <TaskListTable tableData={dashboardData?.recentTasks || []} />
           </div>
         </div>
       </div>
