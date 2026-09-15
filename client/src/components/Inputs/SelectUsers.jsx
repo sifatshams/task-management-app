@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { LuUser } from 'react-icons/lu';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
+import Modal from '../Modal';
 
 const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
   const [allUsers, setAllUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
 
   // get all users
@@ -57,6 +58,14 @@ const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
           <LuUser className="text-sm" /> Add Members
         </button>
       )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Select Users"
+      >
+        <div className="space-y-4 h-[60vh] overflow-y-auto"></div>
+      </Modal>
     </div>
   );
 };
