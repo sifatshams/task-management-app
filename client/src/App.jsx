@@ -6,6 +6,8 @@ import {
   Routes,
 } from 'react-router-dom';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import UserProvider, { useUser } from './context/userContext';
 import CreateTask from './pages/admin/CreateTask';
 import Dashboard from './pages/admin/Dashboard';
@@ -23,11 +25,25 @@ const App = () => {
     <div>
       <UserProvider>
         <Router>
+          {/* global toast container */}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
           <Routes>
+            {/* public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<SignUp />} />
 
-            {/* Admin Routes */}
+            {/* admin routes */}
             <Route element={<PrivateRoute allowedRoles={['admin']} />}>
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/tasks" element={<ManageTasks />} />
@@ -35,8 +51,8 @@ const App = () => {
               <Route path="/admin/users" element={<ManageUsers />} />
             </Route>
 
-            {/* User Routes */}
-            <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+            {/* user routes */}
+            <Route element={<PrivateRoute allowedRoles={['user']} />}>
               <Route path="/user/dashboard" element={<UserDashboard />} />
               <Route path="/user/tasks" element={<MyTasks />} />
               <Route
@@ -45,7 +61,7 @@ const App = () => {
               />
             </Route>
 
-            {/* Default Route */}
+            {/* default route */}
             <Route path="/" element={<Root />} />
           </Routes>
         </Router>
