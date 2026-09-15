@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LuArrowRight } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import InfoCard from '../../components/Card/InfoCard';
+import CustomBarChart from '../../components/Charts/CustomBarChart';
 import CustomPieChart from '../../components/Charts/CustomPieChart';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import TaskListTable from '../../components/TaskListTable';
@@ -129,6 +130,16 @@ const Dashboard = () => {
             </div>
 
             <CustomPieChart data={pieChartData} colors={COLORS} />
+          </div>
+        </div>
+
+        <div>
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <h5 className="font-medium">Task Priority Levels</h5>
+            </div>
+
+            <CustomBarChart data={barChartData} />
           </div>
         </div>
 
