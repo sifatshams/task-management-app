@@ -140,8 +140,8 @@ const SelectUsers = ({ selectedUsers = [], setSelectedUsers }) => {
                     <div
                       className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 shrink-0 ${
                         isSelected
-                          ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
-                          : 'border-slate-300 bg-white'
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-xs shadow-blue-500/20'
+                          : 'border-slate-300 bg-white hover:border-slate-400'
                       }`}
                     >
                       {isSelected && (
@@ -170,7 +170,7 @@ const SelectUsers = ({ selectedUsers = [], setSelectedUsers }) => {
             <button
               type="button"
               onClick={handleAssign}
-              className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all duration-150 cursor-pointer shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100/80 active:scale-95 rounded-xl transition-all duration-150 cursor-pointer border border-blue-200/60 shadow-2xs"
             >
               Apply Selection
             </button>
