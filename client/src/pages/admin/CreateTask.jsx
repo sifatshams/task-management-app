@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { LuTrash2 } from 'react-icons/lu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SelectDropdown from '../../components/Inputs/SelectDropdown';
+import SelectUsers from '../../components/Inputs/SelectUsers';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { PRIORITY_DATA } from '../../utils/data';
+import TodoListInput from '../../components/Inputs/TodoListInput';
 
 const CreateTask = () => {
   const location = useLocation();
@@ -14,7 +16,7 @@ const CreateTask = () => {
     title: '',
     description: '',
     priority: 'Low',
-    dueDate: null,
+    dueDate: '',
     assignedTo: [],
     todoCheckList: [],
     attachments: [],
@@ -35,7 +37,7 @@ const CreateTask = () => {
       title: '',
       description: '',
       priority: 'Low',
-      dueDate: null,
+      dueDate: '',
       assignedTo: [],
       todoCheckList: [],
       attachments: [],
@@ -107,7 +109,7 @@ const CreateTask = () => {
               {/* description */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Description
+                  Description <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   className="w-full text-sm font-medium text-slate-800 bg-slate-50/50 border border-slate-200 rounded-xl p-4 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:ring-4 focus:ring-slate-900/5 transition-all duration-200 outline-none resize-none"
@@ -120,8 +122,8 @@ const CreateTask = () => {
                 ></textarea>
               </div>
 
-              {/* priority select dropdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              {/* priority & due date */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Priority <span className="text-rose-500">*</span>
@@ -138,17 +140,41 @@ const CreateTask = () => {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Due Date <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      className="w-full text-sm font-medium text-slate-800 bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 focus:bg-white focus:border-slate-800 focus:ring-4 focus:ring-slate-900/5 transition-all duration-200 outline-none cursor-pointer [color-scheme:light]"
-                      value={taskData.dueDate}
-                      onChange={({ target }) =>
-                        handleValueChange('dueDate', target.value)
-                      }
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    className="w-full text-sm font-medium text-slate-800 bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 focus:bg-white focus:border-slate-800 focus:ring-4 focus:ring-slate-900/5 transition-all duration-200 outline-none cursor-pointer [color-scheme:light]"
+                    value={taskData.dueDate}
+                    onChange={({ target }) =>
+                      handleValueChange('dueDate', target.value)
+                    }
+                  />
                 </div>
+              </div>
+
+              {/* assigned to */}
+              <div className="flex flex-col pt-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  Assigned To <span className="text-rose-500">*</span>
+                </label>
+                <SelectUsers
+                  selectedUsers={taskData.assignedTo}
+                  setSelectedUsers={(value) => {
+                    handleValueChange('assignedTo', value);
+                  }}
+                />
+              </div>
+
+              {/* todo check list */}
+              <div className="flex flex-col pt-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  TODO Checklist <span className="text-rose-500">*</span>
+                </label>
+                <TodoListInput
+                  todoList={taskData?.todoCheckList}
+                  setTodoList={(value) =>
+                    handleValueChange('todoCheckList', value)
+                  }
+                />
               </div>
             </div>
           </div>
