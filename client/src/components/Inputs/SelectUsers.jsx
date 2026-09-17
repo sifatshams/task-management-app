@@ -59,7 +59,7 @@ const SelectUsers = ({ selectedUsers = [], setSelectedUsers }) => {
         <button
           type="button"
           onClick={handleOpenModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 active:scale-95 rounded-xl transition-all duration-150 cursor-pointer border border-slate-200/60"
+          className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-700 hover:text-blue-600 bg-slate-50 hover:bg-blue-50/80 active:scale-95 rounded-lg border border-slate-200/80 transition-all duration-150 cursor-pointer shadow-2xs"
         >
           <LuUser className="text-sm" />
           <span>
