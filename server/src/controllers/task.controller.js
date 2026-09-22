@@ -163,6 +163,7 @@ export const updateTask = async (req, res) => {
       title,
       description,
       priority,
+      status,
       dueDate,
       todoCheckList,
       attachments,
