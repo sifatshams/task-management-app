@@ -42,6 +42,14 @@ const TaskCard = ({
 
   const totalTodos = todoCheckList.length;
 
+  // dynamic progress calculation logic
+  const calculatedProgress =
+    status === 'Completed'
+      ? 100
+      : totalTodos > 0
+        ? Math.round((completedTodoCount / totalTodos) * 100)
+        : progress || 0;
+
   return (
     <div
       onClick={onClick}
@@ -78,20 +86,20 @@ const TaskCard = ({
 
       <div className="space-y-3.5 pt-2 border-t border-slate-100">
         {/* progress bar */}
-        {totalTodos > 0 && (
-          <div>
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
-              <span>Progress</span>
-              <span className="text-slate-700">{progress}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
+        <div>
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
+            <span>Progress</span>
+            <span className="text-slate-700">{calculatedProgress}%</span>
           </div>
-        )}
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                status === 'Completed' ? 'bg-emerald-500' : 'bg-blue-600'
+              }`}
+              style={{ width: `${calculatedProgress}%` }}
+            ></div>
+          </div>
+        </div>
 
         {/* footer details: date, todo & attachments */}
         <div className="flex items-center justify-between pt-1">
