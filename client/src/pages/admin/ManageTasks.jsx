@@ -45,8 +45,57 @@ const ManageTasks = () => {
     navigate(`/admin/update-task/${taskData._id}`);
   };
 
-  // download task report
-  const handleDownloadReport = async () => {};
+  // download task report as CSV
+  const handleDownloadReport = () => {
+    if (!allTasks || allTasks.length === 0) {
+      alert('No tasks available to download.');
+      return;
+    }
+
+    // CSV headers
+    const headers = [
+      'Task Title',
+      'Description',
+      'Priority',
+      'Status',
+      'Progress (%)',
+      'Created At',
+      'Due Date',
+      'Checklist Total',
+      'Checklist Completed',
+    ];
+
+    // map tasks to CSV rows
+    const rows = allTasks.map((task) => [
+      `"${(task.title || '').replace(/"/g, '""')}"`,
+      `"${(task.description || '').replace(/"/g, '""')}"`,
+      `"${task.priority || 'Low'}"`,
+      `"${task.status || 'Pending'}"`,
+      `"${task.progress || 0}"`,
+      `"${task.createdAt ? new Date(task.createdAt).toLocaleDateString() : ''}"`,
+      `"${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : ''}"`,
+      `"${task.todoCheckList?.length || 0}"`,
+      `"${task.completedTodoCount || 0}"`,
+    ]);
+
+    // construct CSV content
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+
+    // create a temporary link element to trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(
+      'download',
+      `Task_Report_${filterStatus.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`,
+    );
+    document.body.appendChild(link);
+
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     getAllTasks();
