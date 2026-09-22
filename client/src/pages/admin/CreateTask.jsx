@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuPlus, LuSave, LuTrash2 } from 'react-icons/lu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -13,7 +13,7 @@ import { PRIORITY_DATA } from '../../utils/data';
 
 const CreateTask = () => {
   const location = useLocation();
-  const { taskId } = location.state || {};
+  const taskId = location.state?.taskId;
   const navigate = useNavigate();
 
   const [taskData, setTaskData] = useState({
@@ -26,7 +26,6 @@ const CreateTask = () => {
     attachments: [],
   });
 
-  const [currentTask, setCurrentTask] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
@@ -45,6 +44,36 @@ const CreateTask = () => {
       todoCheckList: [],
       attachments: [],
     });
+    setError('');
+  };
+
+  // get task info by ID for update mode
+  const getTaskDetailsByID = async () => {
+    if (!taskId) return;
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        API_PATHS.TASKS.GET_TASK_BY_ID(taskId),
+      );
+      const task = response.data?.task;
+
+      if (task) {
+        setTaskData({
+          title: task.title || '',
+          description: task.description || '',
+          priority: task.priority || 'Low',
+          dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
+          assignedTo: task.assignedTo || [],
+          todoCheckList: task.todoCheckList?.map((item) => item.text) || [],
+          attachments: task.attachments || [],
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching task details:', err);
+      toast.error('Failed to load task details');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // create task
@@ -57,32 +86,67 @@ const CreateTask = () => {
         completed: false,
       }));
 
-      const response = await axiosInstance.post(API_PATHS.TASKS.CREATE_TASK, {
+      await axiosInstance.post(API_PATHS.TASKS.CREATE_TASK, {
         ...taskData,
         dueDate: new Date(taskData.dueDate).toISOString(),
         todoCheckList: todolist,
       });
 
-      // toast msg
       toast.success('Task created successfully');
-      // clear data
       clearData();
-    } catch (error) {
-      console.error('Error creating task:', error);
-      setLoading(false);
+      navigate('/admin/tasks');
+    } catch (err) {
+      console.error('Error creating task:', err);
+      toast.error('Failed to create task');
     } finally {
       setLoading(false);
     }
   };
 
   // update task
-  const updateTask = async () => {};
+  const updateTask = async () => {
+    setLoading(true);
+    try {
+      const todolist = taskData.todoCheckList?.map((item) =>
+        typeof item === 'string' ? { text: item, completed: false } : item,
+      );
 
-  // submit
+      await axiosInstance.put(API_PATHS.TASKS.UPDATE_TASK(taskId), {
+        ...taskData,
+        dueDate: new Date(taskData.dueDate).toISOString(),
+        todoCheckList: todolist,
+      });
+
+      toast.success('Task updated successfully');
+      navigate('/admin/tasks');
+    } catch (err) {
+      console.error('Error updating task:', err);
+      toast.error('Failed to update task');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // delete task
+  const deleteTask = async () => {
+    if (!taskId) return;
+    setLoading(true);
+    try {
+      await axiosInstance.delete(API_PATHS.TASKS.DELETE_TASK(taskId));
+      toast.success('Task deleted successfully');
+      navigate('/admin/tasks');
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      toast.error('Failed to delete task');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // submit handler
   const handleSubmit = async () => {
     setError(null);
 
-    // input validation
     if (!taskData.title.trim()) {
       setError('Title is required!');
       return;
@@ -95,30 +159,30 @@ const CreateTask = () => {
       setError('Due Date is required!');
       return;
     }
-
     if (taskData.assignedTo?.length === 0) {
-      setError('Task not assinged to any member!');
+      setError('Task not assigned to any member!');
       return;
     }
-
     if (taskData.todoCheckList?.length === 0) {
-      setError('Add atleast one todo task!');
+      setError('Add at least one todo task!');
       return;
     }
 
     if (taskId) {
       updateTask();
-      return;
+    } else {
+      createTask();
     }
-
-    createTask();
   };
 
-  // get task info by ID
-  const getTaskDetailsByID = async () => {};
-
-  // delete task
-  const deleteTask = async () => {};
+  // effect to toggle between Create and Update mode
+  useEffect(() => {
+    if (taskId) {
+      getTaskDetailsByID();
+    } else {
+      clearData();
+    }
+  }, [taskId]);
 
   return (
     <DashboardLayout activeMenu="Create Task">
@@ -141,7 +205,7 @@ const CreateTask = () => {
               <button
                 type="button"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100/80 active:scale-95 px-3.5 py-2 rounded-xl border border-rose-200/60 transition-all duration-150 cursor-pointer shadow-2xs"
-                onClick={() => setOpenDeleteAlert(true)}
+                onClick={deleteTask}
               >
                 <LuTrash2 className="text-sm" />
                 <span>Delete</span>
@@ -212,7 +276,7 @@ const CreateTask = () => {
               </div>
             </div>
 
-            {/* Assigned To */}
+            {/* assigned to */}
             <div className="flex flex-col pt-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                 Assigned To <span className="text-rose-500">*</span>
