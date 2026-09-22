@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { LuFileSpreadsheet } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
+import TaskStatusTabs from '../../components/TaskStatusTabs';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
 
@@ -26,7 +27,7 @@ const ManageTasks = () => {
 
       setAllTasks(tasks);
 
-      // Map status summary with default values
+      // map status summary with default values
       const statusArray = [
         { label: 'All', count: statusSummary.all ?? 0 },
         { label: 'Pending', count: statusSummary.pendingTasks ?? 0 },
@@ -56,7 +57,8 @@ const ManageTasks = () => {
   return (
     <DashboardLayout activeMenu="Manage Tasks">
       <div className="max-w-7xl mx-auto my-6 px-4 sm:px-6">
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+          {/* page header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
@@ -76,6 +78,17 @@ const ManageTasks = () => {
               <span>Download Report</span>
             </button>
           </div>
+
+          {/* task filter tabs */}
+          {allTasks?.length > 0 && (
+            <div className="pt-1">
+              <TaskStatusTabs
+                tabs={tabs}
+                activeTab={filterStatus}
+                setActiveTab={setFilterStatus}
+              />
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
