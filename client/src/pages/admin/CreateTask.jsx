@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { LuPlus, LuSave, LuTrash2 } from 'react-icons/lu';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { LuArrowLeft, LuPlus, LuSave, LuTrash2 } from 'react-icons/lu';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AddAttachmentsInput from '../../components/Inputs/AddAttachmentsInput';
 import SelectDropdown from '../../components/Inputs/SelectDropdown';
@@ -12,9 +12,9 @@ import axiosInstance from '../../utils/axios_instance';
 import { PRIORITY_DATA } from '../../utils/data';
 
 const CreateTask = () => {
-  const location = useLocation();
-  const taskId = location.state?.taskId;
   const navigate = useNavigate();
+  const { id } = useParams();
+  const taskId = id;
 
   const [taskData, setTaskData] = useState({
     title: '',
@@ -28,7 +28,6 @@ const CreateTask = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
 
   const handleValueChange = (key, value) => {
     setTaskData((prevData) => ({ ...prevData, [key]: value }));
@@ -185,26 +184,38 @@ const CreateTask = () => {
   }, [taskId]);
 
   return (
-    <DashboardLayout activeMenu="Create Task">
+    <DashboardLayout activeMenu={taskId ? 'Manage Tasks' : 'Create Task'}>
       <div className="max-w-4xl mx-auto py-6 px-3 sm:px-6">
         <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
           {/* header section */}
           <div className="flex items-center justify-between pb-5 border-b border-slate-100">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
-                {taskId ? 'Update Task' : 'Create Task'}
-              </h2>
-              <p className="text-xs sm:text-sm font-medium text-slate-400 mt-0.5">
-                {taskId
-                  ? 'Modify the existing task details below'
-                  : 'Fill in the information to assign a new task'}
-              </p>
+            <div className="flex items-center gap-3">
+              {/* back arrow button */}
+              <button
+                type="button"
+                onClick={() => navigate('/admin/tasks')}
+                className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200/80 rounded-xl transition-all duration-150 cursor-pointer shrink-0"
+                title="Back to Tasks"
+              >
+                <LuArrowLeft className="text-lg sm:text-xl" />
+              </button>
+
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                  {taskId ? 'Update Task' : 'Create Task'}
+                </h2>
+                <p className="text-xs sm:text-sm font-medium text-slate-400 mt-0.5">
+                  {taskId
+                    ? 'Modify the existing task details below'
+                    : 'Fill in the information to assign a new task'}
+                </p>
+              </div>
             </div>
 
             {taskId && (
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100/80 active:scale-95 px-3.5 py-2 rounded-xl border border-rose-200/60 transition-all duration-150 cursor-pointer shadow-2xs"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100/80 active:scale-95 px-3.5 py-2 rounded-xl border border-rose-200/60 transition-all duration-150 cursor-pointer shadow-2xs shrink-0"
                 onClick={deleteTask}
               >
                 <LuTrash2 className="text-sm" />
