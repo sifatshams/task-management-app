@@ -80,7 +80,7 @@ const ManageTasks = () => {
           </div>
 
           {/* task filter tabs */}
-          {allTasks?.length > 0 && (
+          {tabs?.[0]?.count > 0 && (
             <div className="pt-1">
               <TaskStatusTabs
                 tabs={tabs}
