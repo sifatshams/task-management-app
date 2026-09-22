@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LuFileSpreadsheet } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
+import TaskCard from '../../components/Card/TaskCard';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import TaskStatusTabs from '../../components/TaskStatusTabs';
 import { API_PATHS } from '../../utils/api_path';
@@ -8,7 +9,6 @@ import axiosInstance from '../../utils/axios_instance';
 
 const ManageTasks = () => {
   const [allTasks, setAllTasks] = useState([]);
-
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('All');
 
@@ -49,14 +49,13 @@ const ManageTasks = () => {
   const handleDownloadReport = async () => {};
 
   useEffect(() => {
-    getAllTasks(filterStatus);
-
-    return () => {};
+    getAllTasks();
   }, [filterStatus]);
 
   return (
     <DashboardLayout activeMenu="Manage Tasks">
-      <div className="max-w-7xl mx-auto my-6 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto my-6 px-4 sm:px-6 space-y-6">
+        {/* top filter and header box */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
           {/* page header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
@@ -90,6 +89,35 @@ const ManageTasks = () => {
             </div>
           )}
         </div>
+
+        {/* task cards grid container */}
+        {allTasks?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {allTasks.map((item) => (
+              <TaskCard
+                key={item._id}
+                title={item.title}
+                description={item.description}
+                priority={item.priority}
+                status={item.status}
+                progress={item.progress}
+                createdAt={item.createdAt}
+                dueDate={item.dueDate}
+                assignedTo={item.assignedTo?.map((u) => u.profileImage)}
+                attachmentsCount={item.attachments?.length || 0}
+                completedTodoCount={item.completedTodoCount || 0}
+                todoCheckList={item.todoCheckList || []}
+                onClick={() => handleClick(item)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-xs">
+            <p className="text-sm font-semibold text-slate-500">
+              No tasks found for this status.
+            </p>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
