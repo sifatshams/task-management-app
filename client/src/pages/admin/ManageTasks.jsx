@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LuFileSpreadsheet } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { API_PATHS } from '../../utils/api_path';
@@ -54,7 +55,29 @@ const ManageTasks = () => {
 
   return (
     <DashboardLayout activeMenu="Manage Tasks">
-      <div className="my-5"></div>
+      <div className="max-w-7xl mx-auto my-6 px-4 sm:px-6">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                My Tasks
+              </h2>
+              <p className="text-xs sm:text-sm font-medium text-slate-400 mt-0.5">
+                Manage and track all your assigned tasks
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDownloadReport}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 rounded-xl border border-emerald-200/60 shadow-2xs transition-all duration-200 cursor-pointer shrink-0"
+            >
+              <LuFileSpreadsheet className="text-base text-emerald-600" />
+              <span>Download Report</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </DashboardLayout>
   );
 };
