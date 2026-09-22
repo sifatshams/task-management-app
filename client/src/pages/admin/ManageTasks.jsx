@@ -25,7 +25,7 @@ const ManageTasks = () => {
 
       setAllTasks(tasks);
 
-      // map status summary with default values
+      // Map status summary with default values
       const statusArray = [
         { label: 'All', count: statusSummary.all ?? 0 },
         { label: 'Pending', count: statusSummary.pendingTasks ?? 0 },
