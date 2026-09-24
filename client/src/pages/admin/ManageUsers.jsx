@@ -53,6 +53,7 @@ const ManageUsers = () => {
   useEffect(() => {
     let result = users;
 
+    // 1. search filter
     if (searchQuery.trim()) {
       result = result.filter(
         (user) =>
@@ -61,12 +62,18 @@ const ManageUsers = () => {
       );
     }
 
+    // 2. role filter matching schema ('admin' | 'user')
     if (roleFilter !== 'All') {
       result = result.filter((user) => {
-        const userRole =
-          typeof user?.role === 'string' ? user.role : user?.role?.name || '';
+        const userRole = (user?.role || '').toLowerCase();
 
-        return userRole.toLowerCase() === roleFilter.toLowerCase();
+        if (roleFilter === 'Admin') {
+          return userRole === 'admin';
+        }
+        if (roleFilter === 'User') {
+          return userRole === 'user';
+        }
+        return true;
       });
     }
 
@@ -78,7 +85,7 @@ const ManageUsers = () => {
   }, []);
 
   return (
-    <DashboardLayout activeMenu="Manage Users">
+    <DashboardLayout activeMenu="Team Members">
       <div className="max-w-7xl mx-auto py-6 px-3 sm:px-6 space-y-6">
         {/* header section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -124,7 +131,7 @@ const ManageUsers = () => {
 
           {/* role filter tabs */}
           <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl w-full md:w-auto overflow-x-auto">
-            {['All', 'Admin', 'Member'].map((role) => (
+            {['All', 'Admin', 'User'].map((role) => (
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
@@ -173,11 +180,7 @@ const ManageUsers = () => {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => {
-                    const isUserAdmin =
-                      (typeof user?.role === 'string'
-                        ? user.role
-                        : user?.role?.name || ''
-                      ).toLowerCase() === 'admin';
+                    const isAdmin = user?.role === 'admin';
 
                     return (
                       <tr
@@ -211,13 +214,13 @@ const ManageUsers = () => {
 
                         {/* role badge */}
                         <td className="py-3.5 px-5">
-                          {isUserAdmin ? (
+                          {isAdmin ? (
                             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                               Admin
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                              Member
+                              User
                             </span>
                           )}
                         </td>
