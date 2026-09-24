@@ -1,26 +1,24 @@
 import Task from '../models/task.model.js';
 import User from '../models/user.model.js';
 
-// get all users (admin only)
+// get all users including admins with task counts
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: 'user' }).select('-password').lean();
+    // fetch all users without role restrictions
+    const users = await User.find().select('-password').lean();
 
-    // add task counts to each user
+    // attach task counts concurrently
     const usersWithTaskCounts = await Promise.all(
       users.map(async (user) => {
-        const pendingTasks = await Task.countDocuments({
-          assignedTo: user._id,
-          status: 'Pending',
-        });
-        const inProgressTasks = await Task.countDocuments({
-          assignedTo: user._id,
-          status: 'In Progress',
-        });
-        const completedTasks = await Task.countDocuments({
-          assignedTo: user._id,
-          status: 'Completed',
-        });
+        const [pendingTasks, inProgressTasks, completedTasks] =
+          await Promise.all([
+            Task.countDocuments({ assignedTo: user._id, status: 'Pending' }),
+            Task.countDocuments({
+              assignedTo: user._id,
+              status: 'In Progress',
+            }),
+            Task.countDocuments({ assignedTo: user._id, status: 'Completed' }),
+          ]);
 
         return {
           ...user,
@@ -48,13 +46,12 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
-    // validation
-    if (!user)
+    if (!user) {
       return res
         .status(404)
         .json({ success: false, message: 'User not found!' });
+    }
 
-    // success response
     res.status(200).json({ success: true, user });
   } catch (error) {
     res.status(500).json({
