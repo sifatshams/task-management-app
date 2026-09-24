@@ -7,10 +7,17 @@ export const getTasks = async (req, res) => {
     const { status } = req.query;
     const isAdmin = req.user.role === 'admin';
 
+    // ensure userId is converted to mongoose ObjectId for queries
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+
     // base query setup
     const filter = {};
     if (status) filter.status = status;
-    if (!isAdmin) filter.assignedTo = req.user._id;
+
+    // if normal user, match task where assignedTo array contains the user ID
+    if (!isAdmin) {
+      filter.assignedTo = { $in: [userId] };
+    }
 
     // Fetch tasks with lean() for faster execution
     const rawTasks = await Task.find(filter)
@@ -30,12 +37,12 @@ export const getTasks = async (req, res) => {
       };
     });
 
-    // summary query base filter
-    const summaryFilter = isAdmin ? {} : { assignedTo: req.user._id };
+    // summary query base match stage for aggregation
+    const summaryMatch = isAdmin ? {} : { assignedTo: userId };
 
     // single aggregation query for all status counts
     const statusCounts = await Task.aggregate([
-      { $match: summaryFilter },
+      { $match: summaryMatch },
       {
         $group: {
           _id: null,
@@ -63,13 +70,13 @@ export const getTasks = async (req, res) => {
     delete statusSummary._id;
 
     // success response
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       tasks,
       statusSummary,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error!',
       error: error.message,
