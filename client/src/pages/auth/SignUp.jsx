@@ -7,7 +7,6 @@ import { useUser } from '../../context/userContext';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
 import { validateEmail } from '../../utils/helper';
-import uploadImage from '../../utils/upload_image';
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -22,11 +21,9 @@ const SignUp = () => {
   // custom hook
   const { updateUser } = useUser();
 
-  // handle signUp from submit
+  // handle signUp form submit
   const handleSignUp = async (e) => {
     e.preventDefault();
-
-    let profileImageUrl = '';
 
     // validation
     if (!fullName) {
@@ -46,21 +43,29 @@ const SignUp = () => {
 
     setError('');
 
+    // prepare multipart form-data for backend multer/cloudinary upload
+    const formData = new FormData();
+    formData.append('name', fullName);
+    formData.append('email', email);
+    formData.append('password', password);
+    if (adminInviteToken) {
+      formData.append('adminInviteToken', adminInviteToken);
+    }
+    if (profilePic) {
+      formData.append('image', profilePic); // field name must match 'upload.single("image")'
+    }
+
     // signup api call
     try {
-      // upload image if present
-      if (profilePic) {
-        const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || '';
-      }
-
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
-        name: fullName,
-        email,
-        password,
-        profileImage: profileImageUrl,
-        adminInviteToken,
-      });
+      const response = await axiosInstance.post(
+        API_PATHS.AUTH.REGISTER,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
 
       // data from backend res structure
       const { success, user } = response.data;
@@ -89,6 +94,7 @@ const SignUp = () => {
       setError(errorMsg);
     }
   };
+
   return (
     <AuthLayout>
       <div className="lg:w-[100%] h-auto md:h-full mt-10 md:mt-0 flex flex-col justify-center">
