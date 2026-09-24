@@ -37,35 +37,44 @@ const SideMenu = ({ activeMenu }) => {
     <aside className="w-64 h-[calc(100vh-61px)] bg-white border-r border-gray-200/50 sticky top-[61px] z-20 flex flex-col justify-between">
       <div>
         {/* profile section */}
-        <div className="flex flex-col items-center justify-center mb-7 pt-5 px-4 text-center">
-          <div className="relative">
+        <div className="flex flex-col items-center justify-center mb-6 pt-6 px-4 text-center">
+          <div className="relative group">
             {user?.profileImage ? (
               <img
                 src={user.profileImage}
                 alt={user?.name || 'User Profile'}
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-100 shadow-sm"
+                className="w-20 h-20 rounded-full object-cover ring-4 ring-slate-100 shadow-md group-hover:scale-105 transition-all duration-300"
               />
             ) : (
-              /* if img not here */
-              <div className="w-20 h-20 rounded-full bg-primary/10 text-primary font-semibold text-2xl flex items-center justify-center border-2 border-primary/20">
+              /* fallback avatar */
+              <div className="w-20 h-20 rounded-full bg-slate-900 text-white font-bold text-2xl flex items-center justify-center ring-4 ring-slate-100 shadow-md group-hover:scale-105 transition-all duration-300">
                 {getInitial(user?.name)}
               </div>
             )}
+
+            {/* admin badge overlay */}
+            {user?.role === 'admin' && (
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white bg-blue-600 shadow-blue-500/20 shadow-md px-2.5 py-0.5 rounded-full ring-2 ring-white tracking-wider uppercase whitespace-nowrap">
+                Admin
+              </span>
+            )}
           </div>
 
-          {user?.role === 'admin' && (
-            <span className="text-[10px] font-medium text-white bg-primary px-2.5 py-0.5 rounded-full mt-2 tracking-wide uppercase">
-              Admin
-            </span>
-          )}
+          <div className="mt-3.5 space-y-0.5 w-full max-w-[200px]">
+            <h5
+              className="text-slate-800 font-semibold text-base leading-snug truncate"
+              title={user?.name}
+            >
+              {user?.name || 'Guest User'}
+            </h5>
 
-          <h5 className="text-gray-950 font-medium text-base leading-6 mt-3 line-clamp-1">
-            {user?.name || 'Guest User'}
-          </h5>
-
-          <p className="text-[12px] text-gray-500 line-clamp-1">
-            {user?.email || ''}
-          </p>
+            <p
+              className="text-xs font-medium text-slate-400 truncate"
+              title={user?.email}
+            >
+              {user?.email || 'guest@example.com'}
+            </p>
+          </div>
         </div>
 
         {/* navigation links */}
