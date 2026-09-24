@@ -74,7 +74,7 @@ export const loginUser = async (req, res) => {
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials!',
+        message: 'invalid credentials!',
       });
     }
 
@@ -84,7 +84,7 @@ export const loginUser = async (req, res) => {
     // success response
     res.status(200).json({
       success: true,
-      message: 'User logged in successfully!',
+      message: 'user logged in successfully!',
       user: {
         _id: user._id,
         name: user.name,
@@ -97,30 +97,32 @@ export const loginUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error!',
+      message: 'internal server error!',
       error: error.message,
     });
   }
 };
 
-// * private
 // get user profile
 export const getUserProfile = async (req, res) => {
   try {
-    // find user
+    // find user by token payload id
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res
-        .status(400)
-        .json({ success: false, message: 'User not found!' });
+        .status(404)
+        .json({ success: false, message: 'user not found!' });
     }
 
     // success response
-    res.json(user);
+    res.status(200).json({
+      success: true,
+      user,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error!',
+      message: 'internal server error!',
       error: error.message,
     });
   }
@@ -129,57 +131,66 @@ export const getUserProfile = async (req, res) => {
 // update user profile
 export const updateUserProfile = async (req, res) => {
   try {
-    // user find and check if exists
+    // find user by id from auth middleware
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found!',
+        message: 'user not found!',
       });
     }
 
-    // destructure property
-    const { name, email, password } = req.body;
+    // destructure properties from request body
+    const { name, email, password, profileImage } = req.body;
 
     // update name
     if (name !== undefined) {
       user.name = name;
     }
 
-    // update email
+    // update email if unique
     if (email !== undefined && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({
           success: false,
-          message: 'Email already exists!',
+          message: 'email already exists!',
         });
       }
       user.email = email;
     }
 
     // update password
-    if (password !== undefined) {
+    if (password) {
       user.password = password;
     }
 
-    // save on db
-    const updateUser = await user.save();
+    // update profile image via cloudinary file upload or body string
+    if (req.file) {
+      user.profileImage = req.file.path;
+    } else if (profileImage !== undefined) {
+      user.profileImage = profileImage;
+    }
+
+    // save updated user to database
+    const updatedUser = await user.save();
 
     // success response
     res.status(200).json({
       success: true,
-      message: 'Profile updated successfully',
+      message: 'profile updated successfully',
       user: {
-        _id: updateUser._id,
-        name: updateUser.name,
-        email: updateUser.email,
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        profileImage: updatedUser.profileImage,
       },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error!',
+      message: 'internal server error!',
       error: error.message,
     });
   }
