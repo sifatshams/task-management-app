@@ -11,12 +11,12 @@ import { protect } from '../middlewares/auth.middleware.js';
 const authRoute = express.Router();
 
 // auth routes
-authRoute.post('/register', registerUser); // register user
+authRoute.post('/register', upload.single('image'), registerUser); // register user with avatar upload
 authRoute.post('/login', loginUser); // login user
 authRoute.get('/profile', protect, getUserProfile); // get user profile
-authRoute.put('/profile', protect, updateUserProfile); // update user profile
+authRoute.put('/profile', protect, upload.single('image'), updateUserProfile); // update user profile with image upload
 
-// image uploads (using cloudinary)
+// standalone image upload route
 authRoute.post('/upload-image', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res
@@ -24,7 +24,7 @@ authRoute.post('/upload-image', upload.single('image'), (req, res) => {
       .json({ success: false, message: 'no image file uploaded!' });
   }
 
-  // req.file.path
+  // req.file.path contains cloudinary secure url
   const imageUrl = req.file.path;
 
   return res.status(200).json({
