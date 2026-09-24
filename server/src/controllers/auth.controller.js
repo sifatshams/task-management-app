@@ -12,10 +12,10 @@ export const registerUser = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: 'User already exists!' });
+        .json({ success: false, message: 'user already exists!' });
     }
 
-    // detarmine user role: admin if correct token is provided, otherwise user
+    // determine user role: admin if correct token is provided, otherwise user
     let role = 'user';
     if (
       adminInviteToken &&
@@ -24,12 +24,15 @@ export const registerUser = async (req, res) => {
       role = 'admin';
     }
 
+    // get cloudinary image url if uploaded via multer, otherwise use body string
+    const finalProfileImage = req.file ? req.file.path : profileImage || '';
+
     // create new user
     const user = await User.create({
       name,
       email,
       password,
-      profileImage,
+      profileImage: finalProfileImage,
       role,
     });
 
@@ -39,7 +42,7 @@ export const registerUser = async (req, res) => {
     // success response
     res.status(201).json({
       success: true,
-      message: 'User registered successfully!',
+      message: 'user registered successfully!',
       user: {
         _id: user._id,
         name: user.name,
@@ -52,7 +55,7 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error!',
+      message: 'internal server error!',
       error: error.message,
     });
   }
