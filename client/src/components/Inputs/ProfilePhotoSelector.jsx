@@ -4,6 +4,7 @@ import { LuTrash2, LuUpload, LuUser } from 'react-icons/lu';
 const ProfilePhotoSelector = ({ image, setImage }) => {
   const inputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [formatError, setFormatError] = useState('');
 
   // create preview URL whenever image changes
   useEffect(() => {
@@ -27,12 +28,21 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
 
     if (!file) return;
 
-    // validate file type
-    if (!file.type.startsWith('image/')) {
+    // allowed image formats check
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+      setFormatError('Only JPG, JPEG, PNG, and WEBP formats are allowed!');
+
+      // reset input
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
       return;
     }
 
-    // update image state
+    // clear error and update state
+    setFormatError('');
     setImage(file);
   };
 
@@ -44,6 +54,7 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
   // remove selected image
   const handleRemoveImage = () => {
     setImage(null);
+    setFormatError('');
 
     // reset input so the same image can be selected again
     if (inputRef.current) {
@@ -52,12 +63,12 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
   };
 
   return (
-    <div className="flex justify-center mb-6">
-      {/* hidden file input */}
+    <div className="flex flex-col items-center justify-center mb-6">
+      {/* hidden file input with specific accept types */}
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg, image/png, image/jpg, image/webp"
         onChange={handleImageChange}
         className="hidden"
       />
@@ -96,6 +107,11 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
             <LuTrash2 size={16} />
           </button>
         </div>
+      )}
+
+      {/* format error message */}
+      {formatError && (
+        <p className="text-red-500 text-xs mt-2 font-medium">{formatError}</p>
       )}
     </div>
   );
