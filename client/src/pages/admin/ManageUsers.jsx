@@ -14,11 +14,11 @@ const ManageUsers = () => {
   const [roleFilter, setRoleFilter] = useState('All');
   const [loading, setLoading] = useState(false);
 
-  // modal state for delete confirmation
+  // delete modal states
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  // fetch all users
+  // fetch users from api
   const fetchAllUsers = async () => {
     setLoading(true);
     try {
@@ -27,29 +27,29 @@ const ManageUsers = () => {
       setUsers(data);
       setFilteredUsers(data);
     } catch (err) {
-      console.error('Error fetching users:', err);
-      toast.error('Failed to load users list');
+      console.error('error fetching users:', err);
+      toast.error('failed to load users list');
     } finally {
       setLoading(false);
     }
   };
 
-  // delete user handler
+  // delete user request
   const handleDeleteUser = async () => {
     if (!selectedUserId) return;
     try {
       await axiosInstance.delete(API_PATHS.USERS.DELETE_USER(selectedUserId));
-      toast.success('User deleted successfully');
+      toast.success('user deleted successfully');
       setOpenDeleteModal(false);
       setSelectedUserId(null);
-      fetchAllUsers(); // refresh list
+      fetchAllUsers();
     } catch (err) {
-      console.error('Error deleting user:', err);
-      toast.error('Failed to delete user');
+      console.error('error deleting user:', err);
+      toast.error('failed to delete user');
     }
   };
 
-  // search and filter logic
+  // search and role filter logic
   useEffect(() => {
     let result = users;
 
@@ -62,9 +62,12 @@ const ManageUsers = () => {
     }
 
     if (roleFilter !== 'All') {
-      result = result.filter(
-        (user) => user.role?.toLowerCase() === roleFilter.toLowerCase(),
-      );
+      result = result.filter((user) => {
+        const userRole =
+          typeof user?.role === 'string' ? user.role : user?.role?.name || '';
+
+        return userRole.toLowerCase() === roleFilter.toLowerCase();
+      });
     }
 
     setFilteredUsers(result);
@@ -75,9 +78,9 @@ const ManageUsers = () => {
   }, []);
 
   return (
-    <DashboardLayout activeMenu="Team Members">
+    <DashboardLayout activeMenu="Manage Users">
       <div className="max-w-7xl mx-auto py-6 px-3 sm:px-6 space-y-6">
-        {/* Header Section */}
+        {/* header section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2">
@@ -89,14 +92,14 @@ const ManageUsers = () => {
               </h1>
             </div>
             <p className="text-xs sm:text-sm font-medium text-slate-400 mt-1">
-              View, filter, and control user access across the platform.
+              view, filter, and control user access across the platform.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                Total Users
+                total users
               </span>
               <span className="text-lg font-bold text-slate-800">
                 {users.length}
@@ -105,9 +108,9 @@ const ManageUsers = () => {
           </div>
         </div>
 
-        {/* Filter and Search Bar */}
+        {/* search and filter options */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-          {/* Search Box */}
+          {/* search box */}
           <div className="relative w-full md:w-80">
             <LuSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base" />
             <input
@@ -119,7 +122,7 @@ const ManageUsers = () => {
             />
           </div>
 
-          {/* Role Filter Tabs */}
+          {/* role filter tabs */}
           <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl w-full md:w-auto overflow-x-auto">
             {['All', 'Admin', 'Member'].map((role) => (
               <button
@@ -137,7 +140,7 @@ const ManageUsers = () => {
           </div>
         </div>
 
-        {/* Users Table */}
+        {/* users table */}
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -156,7 +159,7 @@ const ManageUsers = () => {
                       colSpan="4"
                       className="text-center py-12 text-slate-400 font-medium"
                     >
-                      Loading users...
+                      loading users...
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
@@ -165,83 +168,91 @@ const ManageUsers = () => {
                       colSpan="4"
                       className="text-center py-12 text-slate-400 font-medium"
                     >
-                      No users found.
+                      no users found.
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((user) => (
-                    <tr
-                      key={user._id}
-                      className="hover:bg-slate-50/60 transition-colors"
-                    >
-                      {/* Name & Email */}
-                      <td className="py-3.5 px-5">
-                        <div className="flex items-center gap-3">
-                          {user?.profileImage ? (
-                            <img
-                              src={user.profileImage}
-                              alt={user.name}
-                              className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
-                              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  filteredUsers.map((user) => {
+                    const isUserAdmin =
+                      (typeof user?.role === 'string'
+                        ? user.role
+                        : user?.role?.name || ''
+                      ).toLowerCase() === 'admin';
+
+                    return (
+                      <tr
+                        key={user._id}
+                        className="hover:bg-slate-50/60 transition-colors"
+                      >
+                        {/* user image and name */}
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-center gap-3">
+                            {user?.profileImage ? (
+                              <img
+                                src={user.profileImage}
+                                alt={user.name}
+                                className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
+                                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-semibold text-slate-800 line-clamp-1">
+                                {user?.name || 'Unnamed User'}
+                              </p>
+                              <p className="text-xs text-slate-400 font-medium line-clamp-1">
+                                {user?.email}
+                              </p>
                             </div>
-                          )}
-                          <div>
-                            <p className="font-semibold text-slate-800 line-clamp-1">
-                              {user?.name || 'Unnamed User'}
-                            </p>
-                            <p className="text-xs text-slate-400 font-medium line-clamp-1">
-                              {user?.email}
-                            </p>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Role Badge */}
-                      <td className="py-3.5 px-5">
-                        {user?.role === 'admin' ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                            Admin
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                            Member
-                          </span>
-                        )}
-                      </td>
+                        {/* role badge */}
+                        <td className="py-3.5 px-5">
+                          {isUserAdmin ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                              Admin
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                              Member
+                            </span>
+                          )}
+                        </td>
 
-                      {/* Joined Date */}
-                      <td className="py-3.5 px-5 font-medium text-slate-500 text-xs">
-                        {user?.createdAt
-                          ? new Date(user.createdAt).toLocaleDateString(
-                              'en-US',
-                              {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              },
-                            )
-                          : 'N/A'}
-                      </td>
+                        {/* join date */}
+                        <td className="py-3.5 px-5 font-medium text-slate-500 text-xs">
+                          {user?.createdAt
+                            ? new Date(user.createdAt).toLocaleDateString(
+                                'en-US',
+                                {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                },
+                              )
+                            : 'N/A'}
+                        </td>
 
-                      {/* Action Button */}
-                      <td className="py-3.5 px-5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedUserId(user._id);
-                            setOpenDeleteModal(true);
-                          }}
-                          className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center"
-                          title="Delete User"
-                        >
-                          <LuTrash2 className="text-base" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        {/* delete action */}
+                        <td className="py-3.5 px-5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedUserId(user._id);
+                              setOpenDeleteModal(true);
+                            }}
+                            className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center"
+                            title="Delete User"
+                          >
+                            <LuTrash2 className="text-base" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -249,7 +260,7 @@ const ManageUsers = () => {
         </div>
       </div>
 
-      {/* Delete User Modal */}
+      {/* delete user modal */}
       <Modal
         isOpen={openDeleteModal}
         onClose={() => {
