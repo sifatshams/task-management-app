@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Inputs/Input';
 import AuthLayout from '../../components/layouts/AuthLayout';
+import { useUser } from '../../context/userContext';
+import { API_PATHS } from '../../utils/api_path';
+import axiosInstance from '../../utils/axios_instance';
 import { validateEmail } from '../../utils/helper';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  // custom hook
+  const { updateUser } = useUser();
 
   // handle login submit
   const handleLogin = async (e) => {
@@ -16,18 +22,50 @@ const Login = () => {
 
     // validation
     if (!validateEmail(email)) {
-      setError('Please enter a valid email!');
+      setError('Please enter a valid email address!');
       return;
     }
 
     if (!password) {
       setError('Please enter the passcode!');
+      return;
     }
 
     setError('');
 
     // login api call
-    
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+
+      // data from backend res structure
+      const { success, user } = response.data;
+
+      if (success && user) {
+        updateUser({
+          ...user,
+          token: user.token || response.data?.token,
+        });
+
+        // role based redirect
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate('/user/dashboard', { replace: true });
+        }
+      } else {
+        setError('Login failed! Invalid user response.');
+      }
+    } catch (err) {
+      // safe error message extraction
+      const errorMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Something went wrong. Please try again!';
+      setError(errorMsg);
+    }
   };
 
   return (
