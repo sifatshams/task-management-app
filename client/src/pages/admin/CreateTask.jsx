@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { LuArrowLeft, LuPlus, LuSave, LuTrash2 } from 'react-icons/lu';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import DeleteAlert from '../../components/DeleteAlert';
 import AddAttachmentsInput from '../../components/Inputs/AddAttachmentsInput';
 import SelectDropdown from '../../components/Inputs/SelectDropdown';
 import SelectUsers from '../../components/Inputs/SelectUsers';
 import TodoListInput from '../../components/Inputs/TodoListInput';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
+import Modal from '../../components/Modal';
 import { API_PATHS } from '../../utils/api_path';
 import axiosInstance from '../../utils/axios_instance';
 import { PRIORITY_DATA } from '../../utils/data';
@@ -28,6 +30,7 @@ const CreateTask = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
 
   const handleValueChange = (key, value) => {
     setTaskData((prevData) => ({ ...prevData, [key]: value }));
@@ -133,6 +136,7 @@ const CreateTask = () => {
     try {
       await axiosInstance.delete(API_PATHS.TASKS.DELETE_TASK(taskId));
       toast.success('Task deleted successfully');
+      setOpenDeleteAlert(false);
       navigate('/admin/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
@@ -216,7 +220,7 @@ const CreateTask = () => {
               <button
                 type="button"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100/80 active:scale-95 px-3.5 py-2 rounded-xl border border-rose-200/60 transition-all duration-150 cursor-pointer shadow-2xs shrink-0"
-                onClick={deleteTask}
+                onClick={() => setOpenDeleteAlert(true)}
               >
                 <LuTrash2 className="text-sm" />
                 <span>Delete</span>
@@ -359,6 +363,18 @@ const CreateTask = () => {
           </div>
         </div>
       </div>
+
+      {/* delete alert modal */}
+      <Modal
+        isOpen={openDeleteAlert}
+        onClose={() => setOpenDeleteAlert(false)}
+        title="Delete Task"
+      >
+        <DeleteAlert
+          content="Are you sure you want to delete this task?"
+          onDelete={() => deleteTask()}
+        />
+      </Modal>
     </DashboardLayout>
   );
 };
